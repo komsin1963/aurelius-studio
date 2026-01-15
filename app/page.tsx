@@ -2,48 +2,52 @@ import Link from 'next/link';
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-black flex flex-col items-center justify-center text-white p-4 font-sans selection:bg-cyan-500">
+    <main className="min-h-screen bg-black flex flex-col items-center justify-center text-white p-4 font-sans overflow-hidden">
       
-      {/* เอฟเฟกต์แสงพื้นหลัง (Glow Background) */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-64 h-64 bg-cyan-600/20 blur-[120px] rounded-full"></div>
+      {/* เอฟเฟกต์แสงพื้นหลัง */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-cyan-900/10 blur-[150px] rounded-full"></div>
       
-      <div className="z-10 text-center space-y-8">
+      <div className="z-10 text-center space-y-12">
         
-        {/* หัวข้อสโลแกน */}
-        <p className="text-cyan-400 tracking-[0.3em] font-medium text-sm animate-pulse">
-          HELLO CREATOR
+        {/* Slogan ด้านบน */}
+        <p className="text-cyan-400 tracking-[0.5em] font-light text-[10px] md:text-xs animate-pulse uppercase">
+          Hello Creator
         </p>
 
-        {/* กล่องชื่อพร้อมนีออนล้อมรอบ */}
-        <div className="relative group">
-          <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-lg blur opacity-40 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
-          <div className="relative px-8 py-6 bg-black ring-1 ring-cyan-500/50 rounded-lg leading-none flex flex-col items-center space-y-2">
-            <h1 className="text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-400">
-              Aurelius Studio
+        {/* กล่องชื่อ Aurelius Studio ล้อมรอบด้วยนีออน */}
+        <div className="relative inline-block group cursor-default">
+          <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl blur opacity-25 group-hover:opacity-60 transition duration-1000"></div>
+          <div className="relative px-10 py-12 bg-black ring-1 ring-white/10 rounded-2xl border border-cyan-500/20 shadow-2xl">
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-gray-500">
+              AURELIUS
             </h1>
-            <p className="text-gray-400 text-lg italic">By Komsin</p>
+            <div className="mt-4 h-[1px] w-full bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent"></div>
+            <p className="mt-4 text-gray-400 text-lg md:text-xl font-light tracking-[0.3em]">STUDIO</p>
           </div>
         </div>
 
-        {/* สโลแกน ผู้สร้าง */}
-        <p className="text-gray-500 text-sm md:text-base">
-          “ พลังแห่งการสรรค์สร้างในมือคุณ ”
-        </p>
+        {/* Branding ผู้สร้าง */}
+        <div className="space-y-3">
+          <p className="text-white/90 text-xl font-medium tracking-tight">BY KOMSIN</p>
+          <div className="flex items-center justify-center gap-2">
+             <span className="h-[1px] w-8 bg-gray-800"></span>
+             <p className="text-gray-500 text-sm italic">ผู้สร้างสรรค์จินตนาการสู่โลกแห่งความจริง</p>
+             <span className="h-[1px] w-8 bg-gray-800"></span>
+          </div>
+        </div>
 
-        {/* ปุ่มเลือก Studio */}
-        <div className="flex flex-col md:flex-row gap-4 justify-center pt-4">
-          <Link href="/studio3" className="group relative px-8 py-3 font-semibold text-black transition-all duration-300">
-            <span className="absolute inset-0 w-full h-full bg-cyan-400 rounded-full group-hover:bg-white"></span>
-            <span className="relative">ไปที่ Studio 3</span>
+        {/* ปุ่มเลือกเข้า Studio */}
+        <div className="flex flex-col md:flex-row gap-6 justify-center pt-10">
+          <Link href="/studio3" className="group relative px-12 py-4 bg-cyan-500 text-black font-bold rounded-full hover:bg-white transition-all duration-500 transform hover:scale-105 shadow-[0_0_30px_rgba(6,182,212,0.4)]">
+            เข้าสู่ STUDIO 3
           </Link>
-          
-          <Link href="/studio4" className="px-8 py-3 font-semibold border border-gray-700 rounded-full hover:bg-gray-800 transition-all text-gray-300">
-            เข้าสู่ Studio 4
+          <Link href="/studio4" className="px-12 py-4 bg-transparent border border-gray-700 text-gray-400 font-bold rounded-full hover:bg-white hover:text-black transition-all duration-300">
+            GALLERY
           </Link>
         </div>
 
-        <footer className="pt-12 text-[10px] text-gray-600 uppercase tracking-widest">
-          Powered by Next.js & Vercel
+        <footer className="pt-20 text-[9px] text-gray-700 uppercase tracking-widest">
+          &copy; 2026 Aurelius Studio • komsin.com
         </footer>
       </div>
     </main>
