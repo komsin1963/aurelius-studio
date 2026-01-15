@@ -1,40 +1,37 @@
+import { kv } from '@vercel/kv';
 import Link from 'next/link';
 
-export default function DesignGallery() {
-  // เมื่อคุณกมสินมีรูปงานดีไซน์สวยๆ ให้เอา URL มาใส่ตรงนี้นะครับ
-  const designs = [
-    { id: 1, title: "Modern Brand Identity", category: "Logo Design", url: "https://images.unsplash.com/photo-1626785774573-4b799315345d?q=80&w=800" },
-    { id: 2, title: "Neon Cyberpunk Poster", category: "AI Art", url: "https://images.unsplash.com/photo-1614728263952-84ea256f9679?q=80&w=800" },
-    { id: 3, title: "Minimalist Packaging", category: "Print", url: "https://images.unsplash.com/photo-1589118949245-7d38baf380d6?q=80&w=800" },
-  ];
+export default async function DesignGallery() {
+  // ดึงข้อมูลรูปทั้งหมดจาก KV Database (ดึงจากใหม่ไปเก่า)
+  const designs: any[] = await kv.lrange('gallery_items', 0, -1) || [];
 
   return (
-    <main className="min-h-screen bg-[#050505] text-white p-6 md:p-12">
+    <main className="min-h-screen bg-black text-white p-6 md:p-12">
       <div className="max-w-6xl mx-auto space-y-10">
-        
         <header className="flex justify-between items-end border-b border-white/10 pb-8">
           <div>
-            <h1 className="text-4xl font-bold tracking-tighter">DESIGN SHOWCASE</h1>
-            <p className="text-cyan-500 font-mono text-xs mt-2 uppercase tracking-widest">Aurelius Studio Masterpieces</p>
+            <h1 className="text-4xl font-bold tracking-tighter text-cyan-400 uppercase">Design Gallery</h1>
+            <p className="text-gray-500 font-mono text-[10px] mt-2 uppercase tracking-[0.3em]">By Komsin - Aurelius Studio</p>
           </div>
-          <Link href="/" className="text-xs text-gray-500 hover:text-white transition-colors">BACK HOME</Link>
+          <Link href="/" className="text-xs text-gray-500 hover:text-white transition-all">BACK HOME</Link>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {designs.map((item) => (
-            <div key={item.id} className="group cursor-pointer">
-              <div className="relative aspect-[4/5] overflow-hidden rounded-sm grayscale hover:grayscale-0 transition-all duration-700 border border-white/5">
-                <img src={item.url} alt={item.title} className="object-cover w-full h-full scale-105 group-hover:scale-100 transition-transform duration-700" />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <span className="border border-white px-4 py-2 text-xs">VIEW PROJECT</span>
-                </div>
+          {designs.length > 0 ? designs.map((item) => (
+            <div key={item.id} className="group">
+              <div className="relative aspect-[4/5] overflow-hidden rounded-xl border border-white/10 shadow-2xl">
+                <img src={item.url} alt={item.title} className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-110" />
               </div>
-              <div className="mt-4 space-y-1">
-                <p className="text-[10px] text-cyan-500 uppercase font-mono">{item.category}</p>
-                <h3 className="text-lg font-medium tracking-tight">{item.title}</h3>
+              <div className="mt-4">
+                <p className="text-[10px] text-cyan-500 uppercase font-mono tracking-widest">{item.category}</p>
+                <h3 className="text-lg font-medium text-gray-200">{item.title}</h3>
               </div>
             </div>
-          ))}
+          )) : (
+            <div className="col-span-full py-20 text-center border border-dashed border-gray-800 rounded-2xl">
+              <p className="text-gray-600 italic">ยังไม่มีผลงานในคลัง... ไปสร้างภาพที่ Studio 3 แล้วกดเซฟได้เลย!</p>
+            </div>
+          )}
         </div>
       </div>
     </main>
