@@ -5,6 +5,10 @@ import { createClient } from '@supabase/supabase-js';
 import { Paintbrush, Printer, Download, Image as ImageIcon, Loader2, Scissors, Square, Layout, Wand2, CupSoda, Disc, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
+// ในส่วนของ UI ให้เพิ่มโค้ดนี้
+<Link href="/" className="text-blue-500 underline">
+  ⬅️ กลับหน้าหลัก
+</Link>
 // --- CONFIGURATION ---
 const supabaseUrl = 'https://sriunfblgxorzzvzmpmf.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyaXVuZmJsZ3hvcnp6dnptcG1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY2ODY0MzIsImV4cCI6MjA1MjI2MjQzMn0.sb_publishable_jaw_05elpxOUk4oAjvKy7g_ZQoQ-BeU';
