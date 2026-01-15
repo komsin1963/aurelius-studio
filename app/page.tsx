@@ -9,6 +9,6 @@ export default function Home() {
         <Link href="/studio3">ไปที่ Studio 3 (AI Generator)</Link> | 
         <Link href="/studio4">ไปที่ Studio 4</Link>
       </nav>
-    </div>
+    </div> 
   );
 }
