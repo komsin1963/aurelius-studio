@@ -2,159 +2,142 @@
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Zap, History, LayoutDashboard, Crown, ArrowUpRight, User, Settings } from 'lucide-react';
+import { BookOpen, PlayCircle, Zap, ShieldCheck, ArrowUpRight, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
-export default function DashboardPage() {
-  const [logs, setLogs] = useState<any[]>([]);
+export default function UserDashboard() {
   const [profile, setProfile] = useState<any>(null);
+  const [unlockedEbooks, setUnlockedEbooks] = useState<any[]>([]);
+  const [unlockedVideos, setUnlockedVideos] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      // ดึงข้อมูล User ปัจจุบัน
+    const fetchDashboardData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      
-      if (user) {
-        // ดึงข้อมูลเครดิตจากตาราง profiles
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-        if (profileData) setProfile(profileData);
+      if (!user) return;
 
-        // ดึงประวัติการใช้งานเฉพาะของ User คนนี้
-        const { data: logData } = await supabase
-          .from('usage_logs')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(5);
-        if (logData) setLogs(logData);
-      }
+      // ดึงข้อมูลโปรไฟล์และสินทรัพย์ที่ปลดล็อกแล้ว
+      const [profileRes, ebooksRes, videosRes] = await Promise.all([
+        supabase.from('profiles').select('*').eq('id', user.id).single(),
+        supabase.from('unlocked_ebooks').select('ebooks(*)').eq('user_id', user.id).limit(3),
+        supabase.from('unlocked_videos').select('videos(*)').eq('user_id', user.id).limit(3)
+      ]);
+
+      setProfile(profileRes.data);
+      if (ebooksRes.data) setUnlockedEbooks(ebooksRes.data.map(i => i.ebooks));
+      if (videosRes.data) setUnlockedVideos(videosRes.data.map(i => i.videos));
+      setLoading(false);
     };
-    fetchData();
+
+    fetchDashboardData();
   }, []);
 
+  if (loading) return <div className="min-h-screen bg-[#050508] flex items-center justify-center text-cyan-500 font-black animate-pulse">SYNCING NEURAL LINK...</div>;
+
   return (
-    <div className="min-h-screen bg-[#020205] text-white p-6 md:p-12">
+    <div className="min-h-screen bg-[#050508] text-white p-8 md:p-12 lg:ml-64">
       <div className="max-w-6xl mx-auto">
         
-        {/* --- HEADER SECTION --- */}
-        <div className="flex justify-between items-center mb-12">
-          <div>
-            <h1 className="text-4xl font-black italic tracking-tighter uppercase leading-none">
-              Aurelius<span className="text-cyan-500">X</span> Bulletin
-            </h1>
-            <p className="text-slate-500 text-[10px] tracking-[0.5em] font-bold mt-2 italic uppercase">System Controller by Komsin</p>
+        {/* Header - Welcome back */}
+        <header className="mb-12">
+          <div className="flex items-center gap-3 mb-4">
+            <ShieldCheck className="text-cyan-500" size={18} />
+            <span className="text-[10px] font-black text-cyan-500 uppercase tracking-[0.4em]">Citizen Status: Authorized</span>
           </div>
+          <h1 className="text-5xl md:text-7xl font-black italic uppercase tracking-tighter">
+            Welcome, <span className="text-cyan-500">{profile?.display_name || 'Citizen'}</span>
+          </h1>
+        </header>
 
-          {/* ปุ่ม Profile & Settings ที่เพิ่มใหม่ */}
-          <div className="flex items-center gap-3">
-            <Link href="/profile" className="flex items-center gap-3 bg-white/5 border border-white/10 pl-2 pr-5 py-2 rounded-full hover:bg-white/10 hover:border-cyan-500/50 transition-all group">
-              <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-fuchsia-600 rounded-full flex items-center justify-center border-2 border-black group-hover:scale-110 transition-transform">
-                <User size={18} className="text-white" />
-              </div>
-              <div className="hidden md:block">
-                <p className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em] mb-0.5">Authorized User</p>
-                <p className="text-[10px] font-black text-white uppercase italic tracking-tighter">View Profile</p>
-              </div>
-            </Link>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <div className="bg-white/5 border border-white/10 p-8 rounded-[2.5rem] flex flex-col justify-between group hover:border-cyan-500/50 transition-all">
+            <Zap className="text-cyan-500 mb-4" size={32} fill="currentColor" />
+            <div>
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Available Power</p>
+              <p className="text-4xl font-black italic">{profile?.credits?.toLocaleString()} <span className="text-sm">XP</span></p>
+            </div>
           </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          {/* --- LEFT: WALLET & PLAN --- */}
-          <div className="space-y-6">
-            <div className="bg-slate-900/40 border border-white/5 p-8 rounded-[3rem] backdrop-blur-2xl relative overflow-hidden group shadow-2xl">
-              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-                <Zap size={80} className="text-yellow-400" />
-              </div>
-              
-              <div className="relative z-10">
-                <div className="flex items-center gap-3 mb-8">
-                  <div className="p-2 bg-yellow-400/20 rounded-xl shadow-[0_0_15px_rgba(250,204,21,0.2)]">
-                    <Zap size={16} className="text-yellow-400" />
-                  </div>
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">X-Wallet Balance</span>
-                </div>
-                
-                <div className="mb-8">
-                  <p className="text-7xl font-black italic tracking-tighter text-white">
-                    {profile?.credits ?? '0'}
-                  </p>
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mt-2">Free Credits Remaining</p>
-                </div>
+          <div className="bg-white/5 border border-white/10 p-8 rounded-[2.5rem] flex flex-col justify-between group hover:border-cyan-500/50 transition-all">
+            <BookOpen className="text-white/40 mb-4 group-hover:text-white transition-colors" size={32} />
+            <div>
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">E-books Unlocked</p>
+              <p className="text-4xl font-black italic">{unlockedEbooks.length}</p>
+            </div>
+          </div>
 
-                <Link href="/profile" className="w-full py-4 rounded-2xl bg-cyan-500 text-black text-[10px] font-black uppercase tracking-widest hover:bg-white transition-all flex items-center justify-center gap-2">
-                  Top Up Credits <ArrowUpRight size={14} />
+          <div className="bg-white/5 border border-white/10 p-8 rounded-[2.5rem] flex flex-col justify-between group hover:border-cyan-500/50 transition-all">
+            <PlayCircle className="text-white/40 mb-4 group-hover:text-white transition-colors" size={32} />
+            <div>
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Academy Courses</p>
+              <p className="text-4xl font-black italic">{unlockedVideos.length}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Assets Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          
+          {/* Recent E-books */}
+          <div>
+            <div className="flex items-center justify-between mb-8 border-b border-white/5 pb-4">
+              <h2 className="text-xl font-black italic uppercase tracking-widest">Recent Knowledge Assets</h2>
+              <Link href="/ebook" className="text-[10px] font-black text-cyan-500 uppercase hover:underline">Vault Store</Link>
+            </div>
+            <div className="space-y-4">
+              {unlockedEbooks.length > 0 ? unlockedEbooks.map((book) => (
+                <Link key={book.id} href={`/ebook/read/${book.id}`} className="flex items-center gap-6 p-4 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/5 transition-all group">
+                  <div className="w-16 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                    <img src={book.cover_url} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex-grow">
+                    <p className="font-black uppercase italic text-sm group-hover:text-cyan-500 transition-colors">{book.title}</p>
+                    <p className="text-[9px] font-bold text-slate-500 uppercase mt-1">Unlocked • Read Now</p>
+                  </div>
+                  <ArrowUpRight size={20} className="text-slate-700 group-hover:text-cyan-500 transition-colors" />
                 </Link>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-br from-fuchsia-600/10 to-transparent border border-white/5 p-8 rounded-[3rem] backdrop-blur-md">
-               <Crown className="text-fuchsia-500 mb-4" size={24} />
-               <p className="text-xs font-black uppercase tracking-widest">Membership Status</p>
-               <p className="text-[10px] text-slate-500 mt-2 uppercase font-bold tracking-tighter italic">
-                 {profile?.is_pro ? 'PRO MEMBER' : 'FREE ACCOUNT'}
-               </p>
+              )) : (
+                <p className="text-slate-600 italic text-sm font-bold uppercase py-10">No assets unlocked yet.</p>
+              )}
             </div>
           </div>
 
-          {/* --- RIGHT: RECENT ACTIVITY LOGS --- */}
-          <div className="lg:col-span-2 space-y-4">
-            <div className="flex items-center justify-between mb-4 px-4">
-              <div className="flex items-center gap-2">
-                <History size={16} className="text-cyan-500" />
-                <span className="text-[10px] font-black uppercase tracking-[0.3em]">Personal Activity Logs</span>
-              </div>
-              <span className="text-[9px] font-bold text-slate-600 uppercase italic">Real-time Tracking</span>
+          {/* Recent Videos */}
+          <div>
+            <div className="flex items-center justify-between mb-8 border-b border-white/5 pb-4">
+              <h2 className="text-xl font-black italic uppercase tracking-widest">Neural Training</h2>
+              <Link href="/academy" className="text-[10px] font-black text-cyan-500 uppercase hover:underline">Academy Store</Link>
             </div>
-            
-            {logs.length > 0 ? logs.map((log) => (
-              <div key={log.id} className="bg-white/5 border border-white/5 p-6 rounded-[2rem] flex items-center justify-between hover:bg-white/[0.08] transition-all group backdrop-blur-sm">
-                <div className="flex items-center gap-5">
-                  {log.image_url ? (
-                    <div className="relative">
-                       <img src={log.image_url} className="w-14 h-14 rounded-2xl object-cover border border-white/10 group-hover:scale-105 transition-transform" />
-                       <div className="absolute -bottom-1 -right-1 bg-cyan-500 w-4 h-4 rounded-full border-2 border-black flex items-center justify-center">
-                          <Zap size={8} className="text-black" />
-                       </div>
-                    </div>
-                  ) : (
-                    <div className="w-14 h-14 rounded-2xl bg-slate-800 flex items-center justify-center italic text-[10px] border border-white/5">AI</div>
-                  )}
-                  <div>
-                    <p className="text-[10px] font-black text-cyan-500 uppercase tracking-widest">{log.action_type}</p>
-                    <p className="text-xs text-slate-300 mt-1 font-bold line-clamp-1">{log.details}</p>
+            <div className="space-y-4">
+              {unlockedVideos.length > 0 ? unlockedVideos.map((video) => (
+                <Link key={video.id} href={`/academy/${video.id}`} className="flex items-center gap-6 p-4 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/5 transition-all group">
+                  <div className="w-24 aspect-video rounded-lg overflow-hidden flex-shrink-0 bg-black/40 relative">
+                    <img src={video.thumbnail_url} className="w-full h-full object-cover opacity-60" />
+                    <PlayCircle className="absolute inset-0 m-auto text-white/40 group-hover:text-cyan-500" size={24} />
                   </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-[9px] text-slate-600 font-black uppercase tracking-tighter">
-                    {new Date(log.created_at).toLocaleTimeString()}
-                  </p>
-                </div>
-              </div>
-            )) : (
-              <div className="bg-white/5 border border-dashed border-white/10 p-12 rounded-[2rem] text-center">
-                <p className="text-xs text-slate-600 font-black uppercase tracking-widest">No Recent Activity Found</p>
-              </div>
-            )}
+                  <div className="flex-grow">
+                    <p className="font-black uppercase italic text-sm group-hover:text-cyan-500 transition-colors">{video.title}</p>
+                    <p className="text-[9px] font-bold text-slate-500 uppercase mt-1">Ready to Stream</p>
+                  </div>
+                  <ArrowUpRight size={20} className="text-slate-700 group-hover:text-cyan-500 transition-colors" />
+                </Link>
+              )) : (
+                <p className="text-slate-600 italic text-sm font-bold uppercase py-10">No courses started yet.</p>
+              )}
+            </div>
           </div>
 
         </div>
 
-        {/* --- FOOTER TRADEMARK --- */}
-        <div className="mt-16 pt-8 border-t border-white/5 text-center">
-           <p className="text-[9px] font-black text-slate-700 uppercase tracking-[0.8em]">Aurelius Studio By Komsin Intelligence</p>
-        </div>
-
+        {/* Bottom Tag */}
+        <footer className="mt-24 pt-8 border-t border-white/5 text-center">
+          <p className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-700 italic">
+            Aurelius Protocol Powered by Komsin Intelligence
+          </p>
+        </footer>
       </div>
     </div>
   );
