@@ -4,10 +4,13 @@ import { NextResponse } from 'next/server';
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
- const body = await req.json();
-const { email, type, credits } = body;
-
   try {
+    // 1. ตรวจสอบว่ามีข้อมูลส่งมาจริงไหม ป้องกัน Error เวลา body ว่าง
+    const body = await req.json();
+    if (!body) return NextResponse.json({ error: "No body provided" }, { status: 400 });
+
+    const { email, type, credits } = body;
+
     const data = await resend.emails.send({
       from: 'Aurelius Studio <onboarding@resend.dev>', // เมื่อจด komsin.com แล้วให้เปลี่ยนเป็น hello@komsin.com
       to: [email],
@@ -25,7 +28,8 @@ const { email, type, credits } = body;
     });
 
     return NextResponse.json(data);
-  } catch (error) {
-    return NextResponse.json({ error });
+  } catch (error: any) {
+    // 2. ใส่ : any เพื่อบอก TypeScript ไม่ต้องกังวลเรื่องประเภทของ error
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

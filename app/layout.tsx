@@ -1,5 +1,6 @@
+export const dynamic = 'force-dynamic';
 import type { Metadata } from "next";
-import { Inter } from "next/font-awesome"; // หรือฟอนต์ที่คุณกมสินใช้อยู่เดิม
+import { Inter } from "next/font/google"; // เปลี่ยนจาก awesome เป็น google
 import "./globals.css";
 // 1. Import Toaster สำหรับระบบแจ้งเตือน
 import { Toaster } from 'react-hot-toast';
