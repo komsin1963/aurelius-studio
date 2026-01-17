@@ -4,7 +4,7 @@ import { Inter } from "next/font/google"; // เปลี่ยนจาก awes
 import "./globals.css";
 // 1. Import Toaster สำหรับระบบแจ้งเตือน
 import { Toaster } from 'react-hot-toast';
-
+ 
 export const metadata: Metadata = {
   title: "AureliusX | By Komsin Intelligence",
   description: "Advanced AI Learning & Digital Asset Protocol",
